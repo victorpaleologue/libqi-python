@@ -1,6 +1,6 @@
 include_guard(GLOBAL)
 
-
+# Shared components between tests and the Python extension are put here.
 add_library(qi_python_objects OBJECT)
 
 target_sources(qi_python_objects
@@ -55,8 +55,8 @@ set_target_properties(qi_python_objects
   # target.
   PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-
-Python_add_library(qi_python MODULE)
+# The Python extension
+find_package(PythonExtensions REQUIRED)
 
 set(QIPYTHON_PYTHON_MODULE_FILES
     qi/__init__.py
@@ -67,30 +67,30 @@ set(QIPYTHON_PYTHON_MODULE_FILES
     qi/_type.py
     qi/_version.py)
 
-target_sources(qi_python
-  PRIVATE src/module.cpp
-          ${QIPYTHON_PYTHON_MODULE_FILES}
-          qi/test/__init__.py
-          qi/test/conftest.py
-          qi/test/test_applicationsession.py
-          qi/test/test_async.py
-          qi/test/test_call.py
-          qi/test/test_log.py
-          qi/test/test_module.py
-          qi/test/test_promise.py
-          qi/test/test_property.py
-          qi/test/test_return_empty_object.py
-          qi/test/test_session.py
-          qi/test/test_signal.py
-          qi/test/test_strand.py
-          qi/test/test_typespassing.py
-          setup.py
-          pyproject.toml
-          README.rst)
+add_library(qi_python MODULE
+    src/module.cpp
+    ${QIPYTHON_PYTHON_MODULE_FILES}
+    qi/test/__init__.py
+    qi/test/conftest.py
+    qi/test/test_applicationsession.py
+    qi/test/test_async.py
+    qi/test/test_call.py
+    qi/test/test_log.py
+    qi/test/test_module.py
+    qi/test/test_promise.py
+    qi/test/test_property.py
+    qi/test/test_return_empty_object.py
+    qi/test/test_session.py
+    qi/test/test_signal.py
+    qi/test/test_strand.py
+    qi/test/test_typespassing.py
+    setup.py
+    pyproject.toml
+    README.rst)
 
+python_extension_module(qi_python)
+target_link_libraries(qi_python cxx11 qi_python_objects) # no keyword arg to work well with PythonExtension
 enable_warnings(qi_python)
-
-target_link_libraries(qi_python PRIVATE cxx11 qi_python_objects)
 
 set_target_properties(qi_python
   PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${QIPYTHON_PYTHON_MODULE_NAME}
@@ -103,3 +103,4 @@ if(NOT QIPYTHON_STANDALONE)
   target_sources(qimodule_python_plugin PRIVATE src/qimodule_python_plugin.cpp)
   target_link_libraries(qimodule_python_plugin PRIVATE qi.interface)
 endif()
+
